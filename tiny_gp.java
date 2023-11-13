@@ -52,7 +52,7 @@ public class tiny_gp {
             case MUL : return( run() * run() );
             case SIN : return( Math.sin( run() ) );
             case COS : return( Math.cos( run() ) );
-            case LOG : return( Math.log( Math.abs( run() + 0.0001) ) );
+            case LOG : return( Math.log( Math.abs( run()) + 0.0001) );
             case DIV : {
                            double num = run(), den = run();
                            if ( Math.abs( den ) <= 0.001 )
