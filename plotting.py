@@ -106,8 +106,3 @@ for file in files_to_run:
         # ax.legend()
         plt.savefig(savefile)
         plt.clf()
-
-
-
-    
-
