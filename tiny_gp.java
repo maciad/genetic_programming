@@ -22,18 +22,23 @@ public class tiny_gp {
         COS = 115,
         LOG = 116,
         FSET_START = ADD,
-        FSET_END = LOG;
+        // FSET_END = LOG;
+        FSET_END = DIV;
     static double [] x = new double[FSET_START];
     static double minrandom, maxrandom;
     static char [] program;
     static int PC;
     static int varnumber, fitnesscases, randomnumber;
+    static double StoppingValue = -1e-5;
+    // static double StoppingValue = -1;
     static double fbestpop = 0.0, favgpop = 0.0;
+    static int best_index = 0;
     static long seed;
     static double avg_len;
     static final int
         MAX_LEN = 10000,
-        POPSIZE = 100000,
+        POPSIZE = 25000,
+        // POPSIZE = 100000
         DEPTH   = 5,
         GENERATIONS = 100,
         TSIZE = 2;
@@ -41,6 +46,7 @@ public class tiny_gp {
         PMUT_PER_NODE  = 0.05,
         CROSSOVER_PROB = 0.9;
     static double [][] targets;
+    static String saveFile = "best_individual.txt";
 
     double run() { /* Interpreter */
         char primitive = program[PC++];
@@ -227,6 +233,78 @@ public class tiny_gp {
         return (0); // should never get here
     }
 
+    static void saveBestIndividualToFile(char[] bestIndividual, String filename) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+
+            // Wywołanie metody print_indiv w celu zapisania najlepszego osobnika do pliku
+            printIndivToFile(bestIndividual, 0, writer);
+
+            writer.close();
+            System.out.println("Najlepszy osobnik został zapisany do pliku: " + filename);
+        } catch (IOException e) {
+            System.err.println("Błąd podczas zapisywania do pliku: " + e.getMessage());
+        }
+    }
+
+    // Metoda pomocnicza do zapisywania osobnika do pliku
+    static int printIndivToFile(char[] buffer, int buffercounter, BufferedWriter writer) throws IOException {
+        int a1 = 0, a2;
+        if (buffer[buffercounter] < FSET_START) {
+            if (buffer[buffercounter] < varnumber)
+                writer.write("X" + (buffer[buffercounter] + 1) + " ");
+            else
+                writer.write(String.valueOf(x[buffer[buffercounter]]));
+            return ++buffercounter;
+        }
+        switch (buffer[buffercounter]) {
+            case ADD:
+                writer.write("(");
+                a1 = printIndivToFile(buffer, ++buffercounter, writer);
+                writer.write(" + ");
+                a2 = printIndivToFile(buffer, a1, writer);
+                writer.write(")");
+                return a2;
+            case SUB:
+                writer.write("(");
+                a1 = printIndivToFile(buffer, ++buffercounter, writer);
+                writer.write(" - ");
+                a2 = printIndivToFile(buffer, a1, writer);
+                writer.write(")");
+                return a2;
+            case MUL:
+                writer.write("(");
+                a1 = printIndivToFile(buffer, ++buffercounter, writer);
+                writer.write(" * ");
+                a2 = printIndivToFile(buffer, a1, writer);
+                writer.write(")");
+                return a2;
+            case DIV:
+                writer.write("(");
+                a1 = printIndivToFile(buffer, ++buffercounter, writer);
+                writer.write(" / ");
+                a2 = printIndivToFile(buffer, a1, writer);
+                writer.write(")");
+                return a2;
+            case SIN:
+                writer.write("sin(");
+                a1 = printIndivToFile(buffer, ++buffercounter, writer);
+                writer.write(")");
+                return a1;
+            case COS:
+                writer.write("cos(");
+                a1 = printIndivToFile(buffer, ++buffercounter, writer);
+                writer.write(")");
+                return a1;
+            case LOG:
+                writer.write("ln(");
+                a1 = printIndivToFile(buffer, ++buffercounter, writer);
+                writer.write(")");
+                return a1;
+        }
+        return 0; // should never get here
+    }
+
 
     static char [] buffer = new char[MAX_LEN];
     char [] create_random_indiv( int depth ) {
@@ -276,6 +354,7 @@ public class tiny_gp {
                 " Best Fitness="+(-fbestpop)+" Avg Size="+avg_len+
                 "\nBest Individual: ");
         print_indiv( pop[best], 0 );
+        best_index = best;
         System.out.print( "\n");
         System.out.flush();
     }
@@ -392,8 +471,10 @@ public class tiny_gp {
         print_parms();
         stats( fitness, pop, 0 );
         for ( gen = 1; gen < GENERATIONS; gen ++ ) {
-            if (  fbestpop > -1e-5 ) {
+            if (  fbestpop > StoppingValue ) {
                 System.out.print("PROBLEM SOLVED\n");
+                // Zapisanie najlepszego osobnika do pliku
+                saveBestIndividualToFile(pop[best_index], saveFile);
                 System.exit( 0 );
             }
             for ( indivs = 0; indivs < POPSIZE; indivs ++ ) {
@@ -414,6 +495,8 @@ public class tiny_gp {
             stats( fitness, pop, gen );
         }
         System.out.print("PROBLEM *NOT* SOLVED\n");
+        // Zapisanie najlepszego osobnika do pliku
+        saveBestIndividualToFile(pop[best_index], saveFile);
         System.exit( 1 );
     }
 
@@ -427,6 +510,9 @@ public class tiny_gp {
         }
         if ( args.length == 1 ) {
             fname = args[0];
+            saveFile = fname.split("\\.")[0] + ".txt";
+            // replace data/zad4/0_100.txt -> results/zad4/0_100.txt
+            saveFile = saveFile.replace("data", "results");
         }
 
         tiny_gp gp = new tiny_gp(fname, s);
