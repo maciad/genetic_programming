@@ -25,20 +25,31 @@ def func6(x, y):
     return x**2 + 3*x*y - 7*y + 1
 
 files_to_run = []
-for filename in glob.glob('results/zad1/*.txt'):
+# for filename in glob.glob('results/zad1/*.txt'):
+#     files_to_run.append(filename)
+for filename in glob.glob('results/zad2/*.txt'):
+    files_to_run.append(filename)
+for filename in glob.glob('results/zad3/*.txt'):
     files_to_run.append(filename)
 for filename in glob.glob('results/zad4/*.txt'):
     files_to_run.append(filename)
+for filename in glob.glob('results/zad5/*.txt'):
+    files_to_run.append(filename)
 for filename in glob.glob('results/zad6/*.txt'):
     files_to_run.append(filename)
+# for filename in glob.glob('results/zad6/*.txt'):
+#     files_to_run.append(filename)
+print(files_to_run)
 
 for file in files_to_run:
     savefile = file.replace('.txt', '.png')
     # x_min, x_max = file.split('/')[-1].split('\\')[-1].split('.')[0].split('_')
-    x_min, x_max = os.path.splitext(os.path.basename(file))[0].split('_')
+    # x_min, x_max = os.path.splitext(os.path.basename(file))[0].split('_')
+    print(file.split('\\')[-1].replace('.txt', '').split('_'))
+    x_min, x_max = file.split('\\')[-1].replace('.txt', '').split('_')
     print(x_min, x_max)
-    x_min = int(x_min)
-    x_max = int(x_max)
+    x_min = float(x_min)
+    x_max = float(x_max)
 
     # problem = file.split('/')[1][-1]
     problem = file[11]
@@ -88,11 +99,13 @@ for file in files_to_run:
         y = np.linspace(x_min, x_max, 100)
         X, Y = np.meshgrid(x, y)
 
-        original_function = func(X, Y)
+        # original_function = func(X, Y)
 
+        original_function = np.zeros((len(x), len(y)))
         result = np.zeros((len(x), len(y)))
         for i in range(len(x)):
             for j in range(len(y)):
+                original_function[i][j] = func(x[i], y[j])
                 result[i][j] = expr.subs({X1: x[i], X2: y[j]})
 
         fig = plt.figure()
