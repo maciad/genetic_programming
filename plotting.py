@@ -24,21 +24,30 @@ def func5(x, y):
 def func6(x, y):
     return x**2 + 3*x*y - 7*y + 1
 
+def func7(x):
+    return np.sin(x + np.pi/2)
+
+def func8(x):
+    return np.tan(2*x + 1)
+
 files_to_run = []
-# for filename in glob.glob('results/zad1/*.txt'):
+# for filename in glob.glob('results2/zad1/*.txt'):
 #     files_to_run.append(filename)
-for filename in glob.glob('results/zad2/*.txt'):
-    files_to_run.append(filename)
-for filename in glob.glob('results/zad3/*.txt'):
-    files_to_run.append(filename)
-for filename in glob.glob('results/zad4/*.txt'):
-    files_to_run.append(filename)
-for filename in glob.glob('results/zad5/*.txt'):
-    files_to_run.append(filename)
-for filename in glob.glob('results/zad6/*.txt'):
-    files_to_run.append(filename)
-# for filename in glob.glob('results/zad6/*.txt'):
+# for filename in glob.glob('results2/zad2/*.txt'):
 #     files_to_run.append(filename)
+# for filename in glob.glob('results2/zad3/*.txt'):
+#     files_to_run.append(filename)
+# for filename in glob.glob('results2/zad4/*.txt'):
+#     files_to_run.append(filename)
+for filename in glob.glob('results2/zad5/*.txt'):
+    files_to_run.append(filename)
+# for filename in glob.glob('results2/zad6/*.txt'):
+#     files_to_run.append(filename)
+# for filename in glob.glob('results2/zad7/*.txt'):
+#     files_to_run.append(filename)
+# for filename in glob.glob('results2/zad8/*.txt'):
+#     files_to_run.append(filename)
+
 print(files_to_run)
 
 for file in files_to_run:
@@ -51,8 +60,9 @@ for file in files_to_run:
     x_min = float(x_min)
     x_max = float(x_max)
 
-    # problem = file.split('/')[1][-1]
-    problem = file[11]
+
+    problem = file.split('\\')[0][-1]
+    print(problem)
     func = None
     if problem == '1':
         func = func1
@@ -66,19 +76,25 @@ for file in files_to_run:
         func = func5
     elif problem == '6':
         func = func6
+    elif problem == '7':
+        func = func7
+    elif problem == '8':
+        func = func8
 
     with open(file, 'r') as f:
         expression = f.read().strip()
         expr = sympify(expression)
 
-    if problem in ['1', '2', '3']:
+    if problem in ['1', '2', '3', '7', '8']:
         X1 = symbols('X1')
-        
+
         X = np.linspace(x_min, x_max, 100)
         result = np.zeros(len(X))
         original_function = np.zeros(len(X))
         for i in range(len(X)):
+            # print(X[i])
             result[i] = expr.subs({X1: X[i]})
+            # print(result[i])
             original_function[i] = func(X[i])
 
         plt.plot(X, original_function, label='original function', color='blue')
